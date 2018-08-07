@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Awesome IoT </title>
+	<link rel="stylesheet" type="text/css" href="color-picker.min.css">
+
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+	<script type="text/javascript" src="color-picker.min.js"></script>
+	<script type="text/javascript" src="raphael-2.1.4.min.js"></script>
+	<script type="text/javascript" src="justgage.js"></script>
+</head>
+<body>
+	<p> <input type="text"> </p>
+	<div id="gauge" class="200x150px"> </div>
+
+	<script type="text/javascript">
+		var accessToken = "" //get from build.particle.io
+
+		var deviceID = "" //get from console.particle.io or email Kai sent
+
+		var baseURL = "https://api.particle.io/v1/devices/" + deviceID
+
+		function getTemperatureCallback(data, status) {
+			temperature = parseFloat(data.result);
+			temperature = temperature.toFixed(2);
+			g.refresh(temperature);
+			setTimeout(getTemperatureReading, 1000);
+
+		}
+
+		function getTemperatureReading() {
+			$.get(baseURL + "/tempC", {access_token: accessToken}, getTemperatureCallback)
+		}
+
+		var g = new JustGage({ id: "gauge", value: 0, min: 0, max: 40, title: "Temperature C"});
+    	getTemperatureReading();
+
+    	// Complete! 
+	</script>
+</body>
+</html>
+
+
+
+
+
+
+
