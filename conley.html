@@ -1,49 +1,58 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title> Awesome IoT </title>
-	<link rel="stylesheet" type="text/css" href="color-picker.min.css">
+  <head>
+    <meta charset="utf-8">
+    <title>Distance & </title>
+    <link href="color-picker.min.css" rel="stylesheet">
 
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- Include Javascript Libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="color-picker.min.js"></script>
+    <script src="raphael-2.1.4.min.js"></script>
+    <script src="justgage.js"></script>
+  </head>
+  <body>
+    <!-- Main Elements -->
+    <h1> Awesome IoT Website! </h1>
 
-	<script type="text/javascript" src="color-picker.min.js"></script>
-	<script type="text/javascript" src="raphael-2.1.4.min.js"></script>
-	<script type="text/javascript" src="justgage.js"></script>
-</head>
-<body>
-	<p> <input type="text"> </p>
-	<div id="gauge" class="200x150px"> </div>
+    <p><input type="text"></p>
+    <div id="gauge" class="200x160px"></div>
 
-	<script type="text/javascript">
-		var accessToken = "" //get from build.particle.io
+    <!-- Javascript -->
+    
+    <script>
+    var accessToken = "" //Get from build.particle.io
+    var deviceID = ""   //Get from console.particle.io or email Kai sent
+    var baseURL = "https://api.particle.io/v1/devices/" + deviceID
 
-		var deviceID = "" //get from console.particle.io or email Kai sent
+    // Getting the temperature
+    function callback(data, status){
+        if (status == "success") {
+            volts = parseFloat(data.result);
+            volts = volts.toFixed(2);
+            g.refresh(volts);
+            setTimeout(getTemperatureReading, 1000);
+        } else {
+            alert("There was a problem");
+        }
+    }
+    function getTemperatureReading(){
+        $.get(baseURL + "/tempC", {access_token: accessToken}, callback);
+    }
 
-		var baseURL = "https://api.particle.io/v1/devices/" + deviceID
+    // Controlling the color
+    var picker = new CP(document.querySelector('input[type="text"]'));
+    picker.on("stop", function(color) {
+        var rgb = CP.HEX2RGB(color);
+        this.target.value = rgb;
+        $.post(baseURL + "/color", {params: rgb.toString(), access_token: accessToken})        
+        console.log(rgb)
+    });
 
-		function getTemperatureCallback(data, status) {
-			temperature = parseFloat(data.result);
-			temperature = temperature.toFixed(2);
-			g.refresh(temperature);
-			setTimeout(getTemperatureReading, 1000);
+    //Getting the temperature on scale
+    var g = new JustGage({ id: "gauge", value: 0, min: 0, max: 30, title: "Temperature ºC"});
+    getTemperatureReading();
 
-		}
-
-		function getTemperatureReading() {
-			$.get(baseURL + "/tempC", {access_token: accessToken}, getTemperatureCallback)
-		}
-
-		var g = new JustGage({ id: "gauge", value: 0, min: 0, max: 40, title: "Temperature C"});
-    	getTemperatureReading();
-
-    	// Complete! 
-	</script>
-</body>
+    </script>
+  </body>
 </html>
-
-
-
-
-
-
-
